@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 #include "mock/ray/object_manager/object_manager.h"
 #include "ray/common/test_utils.h"
+#include "ray/observability/fake_metric.h"
 
 namespace ray {
 
@@ -69,7 +70,9 @@ class CustomMockObjectManager : public MockObjectManager {
 class LeaseDependencyManagerTest : public ::testing::Test {
  public:
   LeaseDependencyManagerTest()
-      : object_manager_mock_(), lease_dependency_manager_(object_manager_mock_) {}
+      : object_manager_mock_(),
+        fake_task_by_state_counter_(),
+        lease_dependency_manager_(object_manager_mock_, fake_task_by_state_counter_) {}
 
   int64_t NumWaiting(const std::string &lease_name) {
     return lease_dependency_manager_.waiting_leases_counter_.Get({lease_name, false});
@@ -92,6 +95,7 @@ class LeaseDependencyManagerTest : public ::testing::Test {
   }
 
   CustomMockObjectManager object_manager_mock_;
+  ray::observability::FakeMetric fake_task_by_state_counter_;
   LeaseDependencyManager lease_dependency_manager_;
 };
 
